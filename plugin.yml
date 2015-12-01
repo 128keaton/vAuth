@@ -1,0 +1,64 @@
+name: vAuth
+version: 0.1.6
+author: triggjo2
+main: me.triggjo2.vAuth.Main
+description: Offline server verification
+database: false
+website: http://dev.bukkit.org/server-mods/vauth
+commands:
+  register:
+    description: Register your username
+    usage: /<command> <Password> <Confirm Password>
+    aliases: vregister
+  login:
+    description: Login to your registered username
+    usage: /<command> <Password>
+    aliases: vlogin
+  changepassword:
+    description: Change the password for your user
+    usage: /<command> <Current password> <New password> <Confirm new password>
+    aliases: [vchangepassword, changepw, vchangepw]
+  forcepassword:
+    description: Change a players password by force
+    usage: /<command> <Playername> <New password> <Confirm new password>
+    aliases: [vforcepassword, forcepw, vforcepw]
+  vauth:
+    description: Issue a varity of commands
+    usage: /<command> <Argument>
+  op:
+    description: Op a player securely
+    usage: /<command> <Playername> <Password>
+  deop:
+    description: Deop a player securely
+    usage: /<command> <Playername> <Password>
+  ops:
+    description: View ALL ops in the ops.txt file
+    usage: /<command>
+    aliases: vops
+permissions:
+  vauth.*:
+    description: Access to everything
+  vauth.login:
+    description: Access to login, Useless if require login is on or you allow all to login
+  vauth.register:
+    description: Access to login, Useless if require login is on or you allow all to register
+  vauth.changepassword:
+    description: Access to change own password, Useless if allow all to change password
+  vauth.admin.forcepasswordchange:
+    description: Access to change others passwords
+  vauth.admin.vauth:
+    description: Access to various commands
+  vauth.admin.secureop:
+    description: Access to op (Password required)
+  vauth.admin.securedeop:
+    description: Access to deop (Password required)
+  vauth.admin.ops:
+    description: Access to ops
+  vauth.admin.*:
+    description: Allow users to use all admin features of this plugin
+    children: 
+      vauth.admin.forcepasswordchange: true
+      vauth.admin.vauth: true
+      vauth.admin.secureop: true
+      vauth.admin.securedeop: true
+      vauth.admin.ops: true
