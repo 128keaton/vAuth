@@ -1,5 +1,14 @@
 package me.triggjo2.vAuth;
 
+import java.io.FileNotFoundException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Scanner;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -31,6 +40,7 @@ public class ServerListener implements Listener {
 
 	Main plugin;
 	Message msg = new Message(this);
+	private Scanner scanner;
 	
 	public ServerListener(Main instance)
 	{
@@ -58,6 +68,7 @@ public class ServerListener implements Listener {
 			{
 				plugin.playerLocation.put(player.getName(), player.getLocation());
 				plugin.log.info("[vAuth] Storing " + player.getName() + "'s location. Location is " + player.getLocation().toString());
+			if(this.playerInFile(player) == false || this.getWeeksBetween(this.convertStringToDate((String) plugin.UserDate.get(player.getUniqueId().toString())))){
 				if(plugin.UserPass.get(player.getUniqueId().toString()) == null)
 				{
 					// Register
@@ -69,11 +80,66 @@ public class ServerListener implements Listener {
 					msg.send(player, plugin.loginMessage);
 					plugin.notLoggedIn.add(player);
 				}
+				
+			}else{
+				System.out.println("User has logged in");
+			}
 				if(plugin.loginTeleport) loginLocation(player);
 			}
 		}catch (NumberFormatException e){if(plugin.debug) e.printStackTrace();}
 	}
+	public Date convertStringToDate(String oldDate){
+		System.out.println("The string date is: " + oldDate);
+		DateFormat formatter ; 
+		Date newDate = new Date(); 
+		   formatter = new SimpleDateFormat("EEE MMM dd kk:mm:ss zzz yyyy");
+		   try {
+			newDate = formatter.parse(oldDate);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		   
+		   return newDate;
+		
+	}
+	public boolean getWeeksBetween (Date a) {
+		Date b = new Date();
+	    if (b.before(a)) {
+	        return false;
+	    }
+	    a = resetTime(a);
+	    b = resetTime(b);
+
+	    Calendar cal = new GregorianCalendar();
+	    cal.setTime(a);
+	    int weeks = 0;
+	    while (cal.getTime().before(b)) {
+	        // add another week
+	        cal.add(Calendar.WEEK_OF_YEAR, 1);
+	        weeks++;
+	    }
+	    if(weeks >= 1)
+	    {
+	    	System.out.println("User has been logged out for more than a week!");
+	    	return true;
+	    	
+	    }
+	    System.out.println("User has not been logged out for more than a week!");
+	    return false;
 	
+	}
+
+	public static Date resetTime (Date d) {
+	    Calendar cal = new GregorianCalendar();
+	    cal.setTime(d);
+	    cal.set(Calendar.HOUR_OF_DAY, 0);
+	    cal.set(Calendar.MINUTE, 0);
+	    cal.set(Calendar.SECOND, 0);
+	    cal.set(Calendar.MILLISECOND, 0);
+	    return cal.getTime();
+	}
+
 	public void loginLocation(Player player)
 	{
 		String[] toSplit = plugin.loginLocation.split(">>");
@@ -85,7 +151,28 @@ public class ServerListener implements Listener {
 		player.teleport(location, TeleportCause.PLUGIN);
 		plugin.log.info("[vAuth] Teleporting " + player.getName() + " to login location " + location.toString());
 	}
+	public boolean playerInFile(Player player)
 	
+	{
+		try {
+		    scanner = new Scanner(plugin.UserIPFile);
+
+		    //now read the file line by line...
+		    int lineNum = 0;
+		    while (scanner.hasNextLine()) {
+		        String line = scanner.nextLine();
+		        lineNum++;
+		        if(line.contains(player.getUniqueId().toString()) || line.contains(player.getAddress().toString())) { 
+		            System.out.println("User on" +lineNum+" has an IP that matches");
+		            return true;
+		        }
+		    }
+		} catch(FileNotFoundException e) { 
+		    //handle this
+			
+		}
+		return false;
+	}
 	public void teleport(Player player)
 	{
 //		String[] toSplit = plugin.loginLocation.split(">>");

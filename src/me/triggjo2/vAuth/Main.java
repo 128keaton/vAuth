@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
@@ -93,10 +94,18 @@ public class Main extends JavaPlugin{
 	 * Our Passwords controller
 	 */
 	public FileConfiguration UserPass;
+	
+	public FileConfiguration UserIP;
+	
+	public FileConfiguration UserDate;
 	/**
 	 * Our Passwords file's location
 	 */
 	public File UserPassFile;
+	
+	public File UserIPFile;
+	
+	public File UserDateFile;
 	/**
 	 * Our Configuration for the converter
 	 */
@@ -228,6 +237,7 @@ public class Main extends JavaPlugin{
 	/**
 	 * Reference to the messages class file
 	 */
+
 	Message msg = new Message(this);
 	/**
 	 * Plugin Logger (log.info("Message to log");)
@@ -241,10 +251,14 @@ public class Main extends JavaPlugin{
 		loginLocation = "0>>64>>0>>world";
 		ConfigFile = new File(this.getDataFolder(), "config.yml");
 		UserPassFile = new File(this.getDataFolder(), "passwords.yml");
+		UserIPFile = new File(this.getDataFolder(), "ips.yml");
+		UserDateFile = new File(this.getDataFolder(), "last-login.yml");
 		ConvertFile = new File(this.getDataFolder(), "converting.yml");
 		Convert = YamlConfiguration.loadConfiguration(ConvertFile);
 		Config = YamlConfiguration.loadConfiguration(ConfigFile);
 		UserPass = YamlConfiguration.loadConfiguration(UserPassFile);
+		UserIP = YamlConfiguration.loadConfiguration(UserIPFile);
+		UserDate = YamlConfiguration.loadConfiguration(UserDateFile);
 		Bukkit.getServer().getPluginManager().registerEvents(listener, this);
 		config();
 		log.info("[vAuth] v" + getDescription().getVersion() + " Loaded config and user passwords!");
@@ -267,6 +281,8 @@ public class Main extends JavaPlugin{
 		} catch (IOException e) {if(debug) e.printStackTrace();}
 		try {
 			UserPass.save(UserPassFile);
+			UserIP.save(UserIPFile);
+			UserDate.save(UserDateFile);
 		} catch (IOException e) {if(debug) e.printStackTrace();}
 		log.info("[vAuth] Shutting down, saved config and user passwords!");
 	}
@@ -313,7 +329,7 @@ public class Main extends JavaPlugin{
 //								notLoggedIn.remove(player);
 //							}
 							listener.teleport(player);
-							String sIp1 = player.getAddress().getHostName();
+							
 							return true;
 						}
 						msg.send(player, failedLoginMessage);
@@ -470,6 +486,8 @@ public class Main extends JavaPlugin{
 							}
 							try {
 								UserPass.save(UserPassFile);
+								UserIP.save(UserIPFile);
+								UserDate.save(UserDateFile);
 							} catch (IOException e1) {if(debug) e1.printStackTrace();}
 							config();
 							try {
@@ -675,9 +693,13 @@ public class Main extends JavaPlugin{
 				return true;
 			}
 			UserPass.set(player.getUniqueId().toString(), encryptedText);
+			UserIP.set(player.getUniqueId().toString(), player.getAddress().getHostName().toString());
+			UserDate.set(player.getUniqueId().toString(), new Date());
 			try
 			{
 				UserPass.save(UserPassFile);
+				UserIP.save(UserIPFile);
+				UserDate.save(UserDateFile);
 			}catch (IOException e) {if(debug) e.printStackTrace();}
 			return true;
 		}
